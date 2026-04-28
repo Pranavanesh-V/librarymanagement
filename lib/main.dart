@@ -4,6 +4,7 @@ import 'package:librarymanagement/pages/all_books_page.dart';
 import 'package:librarymanagement/pages/book_detail_page.dart';
 import 'package:librarymanagement/pages/home_page.dart';
 import 'package:librarymanagement/pages/landing_page.dart';
+import 'package:librarymanagement/pages/rack_books_page.dart';
 
 
 void main() {
@@ -37,6 +38,15 @@ final GoRouter _router = GoRouter(
       builder: (context, state) {
         final id = state.pathParameters['id']!;
         return BookDetailPage(bookId: id);
+      },
+    ),
+
+    //Rack Details
+    GoRoute(
+      path: '/rack-books/:rack',
+      builder: (context, state) {
+        final rack = state.pathParameters['rack']!;
+        return RackBooksPage(rack: rack);
       },
     ),
   ],

@@ -21,99 +21,114 @@ class LandingPage extends StatelessWidget {
     final bool isLargeDesktop = width > 1400;
     final bool isTabletWeb = width < 1000;
 
-    return Container(
-      color: const Color(0xFFF8FAFC),
-      child: SafeArea(
-        child: Column(
-          children: [
-            // NAVBAR
-            Container(
-              width: double.infinity,
-              color: Colors.white,
-              padding: EdgeInsets.symmetric(
-                horizontal: isLargeDesktop ? 50 : 24,
-                vertical: 18,
-              ),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1500),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.local_library,
-                        color: Colors.indigo,
-                        size: 34,
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          "University Library Portal",
-                          style: TextStyle(
-                            fontSize: isTabletWeb ? 20 : 26,
-                            fontWeight: FontWeight.bold,
-                          ),
+    return SafeArea(
+      child: Column(
+        children: [
+          // NAVBAR (no background image here)
+          Container(
+            width: double.infinity,
+            color: Colors.white.withValues(alpha: 0.92),
+            padding: EdgeInsets.symmetric(
+              horizontal: isLargeDesktop ? 50 : 24,
+              vertical: 18,
+            ),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1500),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.local_library,
+                      color: Colors.indigo,
+                      size: 34,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        "SOT Library Portal",
+                        style: TextStyle(
+                          fontSize: isTabletWeb ? 20 : 26,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
+          ),
 
-            // HERO SECTION
-            Expanded(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1500),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isLargeDesktop ? 50 : 24,
-                      vertical: 30,
-                    ),
-                    child: isTabletWeb
-                        ? Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _buildVisualCard(
-                          height: 280,
-                          iconSize: 100,
-                        ),
-                        const SizedBox(height: 30),
-                        _buildTextSection(
-                          context,
-                          titleSize: 34,
-                          bodySize: 17,
-                          centered: true,
-                        ),
-                      ],
-                    )
-                        : Row(
-                      children: [
-                        Expanded(
-                          flex: 5,
-                          child: _buildTextSection(
+          // IMAGE STARTS BELOW NAVBAR
+          Expanded(
+            child: Container(
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage("assets/images/website.jpeg"),
+                  fit: BoxFit.fill,
+                ),
+              ),
+              child: Container(
+                color: Colors.white.withValues(alpha: 0.40),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1500),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isLargeDesktop ? 50 : 24,
+                        vertical: 30,
+                      ),
+                      child: isTabletWeb
+                          ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _buildVisualCard(
+                            height: 280,
+                            iconSize: 100,
+                          ),
+                          const SizedBox(height: 30),
+                          _buildTextSection(
                             context,
-                            titleSize: isLargeDesktop ? 56 : 46,
-                            bodySize: 20,
-                            centered: false,
+                            titleSize: 34,
+                            bodySize: 17,
+                            centered: true,
+                            textColor: Colors.black,
+                            subTextColor: Colors.black
                           ),
-                        ),
-                        const SizedBox(width: 50),
-                        Expanded(
-                          flex: 4,
-                          child: _buildVisualCard(
-                            height: isLargeDesktop ? 520 : 430,
-                            iconSize: isLargeDesktop ? 180 : 140,
+                        ],
+                      )
+                          : Row(
+                        children: [
+                          Expanded(
+                            flex: 5,
+                            child: _buildTextSection(
+                              context,
+                              titleSize:
+                              isLargeDesktop ? 56 : 46,
+                              bodySize: 20,
+                              centered: false,
+                              textColor: Colors.black,
+                              subTextColor: Colors.black87,
+                            ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(width: 50),
+                          Expanded(
+                            flex: 4,
+                            child: _buildVisualCard(
+                              height:
+                              isLargeDesktop ? 520 : 430,
+                              iconSize:
+                              isLargeDesktop ? 180 : 140,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -124,6 +139,8 @@ class LandingPage extends StatelessWidget {
         required double titleSize,
         required double bodySize,
         required bool centered,
+        required Color textColor,
+        required Color subTextColor,
       }) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -137,6 +154,7 @@ class LandingPage extends StatelessWidget {
             fontSize: titleSize,
             fontWeight: FontWeight.bold,
             height: 1.2,
+            color: textColor,
           ),
         ),
         const SizedBox(height: 20),
@@ -145,8 +163,9 @@ class LandingPage extends StatelessWidget {
           textAlign: centered ? TextAlign.center : TextAlign.left,
           style: TextStyle(
             fontSize: bodySize,
-            color: Colors.black54,
+            color: subTextColor,
             height: 1.5,
+            fontWeight: FontWeight.bold
           ),
         ),
         const SizedBox(height: 35),
@@ -206,62 +225,64 @@ class LandingPage extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.indigo, Colors.blueAccent],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+        image: DecorationImage(
+          image: AssetImage("assets/images/mobile.jpeg"),
+          fit: BoxFit.cover,
         ),
       ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.local_library,
-                size: 100,
-                color: Colors.white,
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                "University Library Management",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
+      child: Container(
+        color: Colors.black.withValues(alpha: 0.45),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.local_library,
+                  size: 100,
                   color: Colors.white,
                 ),
-              ),
-              const SizedBox(height: 14),
-              const Text(
-                "Access books instantly and explore the university catalog.",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white70,
-                ),
-              ),
-              const SizedBox(height: 40),
-              ElevatedButton(
-                onPressed: () => _navigate(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.indigo,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 36,
-                    vertical: 18,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                const SizedBox(height: 24),
+                const Text(
+                  "SOT Library Management",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
-                child: const Text(
-                  "Enter Library",
-                  style: TextStyle(fontSize: 18),
+                const SizedBox(height: 14),
+                const Text(
+                  "Access books instantly and explore the university catalog.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white70,
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 40),
+                ElevatedButton(
+                  onPressed: () => _navigate(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.indigo,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 36,
+                      vertical: 18,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: const Text(
+                    "Enter Library",
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -271,5 +292,4 @@ class LandingPage extends StatelessWidget {
   void _navigate(BuildContext context) {
     context.push('/home');
   }
-
 }

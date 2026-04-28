@@ -29,6 +29,7 @@ class _HomePageState extends State<HomePage> {
     final books = await BookService.loadBooks();
 
     setState(() {
+      allBooks = books;
       AppData.allBooks = books; // 🔥 IMPORTANT FIX
       filteredBooks = books;
       isLoading = false;
@@ -182,7 +183,7 @@ class _HomePageState extends State<HomePage> {
                     Icon(Icons.local_library, color: Colors.indigo, size: 30),
                     SizedBox(width: 10),
                     Text(
-                      "Library Portal",
+                      "SOT Library Portal",
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w800,
@@ -200,7 +201,7 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(width: 12),
                 const Expanded(
                   child: Text(
-                    "Library Portal",
+                    "SOT Library Portal",
                     style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
                   ),
                 ),
@@ -251,7 +252,7 @@ class _HomePageState extends State<HomePage> {
                       color: Colors.indigo, size: 28),
                   SizedBox(width: 10),
                   Text(
-                    "University Library",
+                    "SOT Library",
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,

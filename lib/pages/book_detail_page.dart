@@ -35,7 +35,7 @@ class BookDetailPage extends StatelessWidget {
     final size = MediaQuery.of(context).size;
 
     // ✅ SINGLE RESPONSIVE RULE (WEB vs MOBILE)
-    final bool useWebLayout = size.width > 700 && size.height > 700;
+    final bool useWebLayout = size.width > 560 && size.height > 560;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9),

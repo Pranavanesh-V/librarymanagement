@@ -13,33 +13,33 @@ class AllBooksPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 1️⃣ SINGLE SOURCE OF TRUTH
     final List<BookModel> all = AppData.allBooks;
 
-    // 2️⃣ FILTER BY SHELF (SAFE)
-    final List<BookModel> shelfBooks = all
-        .where((b) => b.shelf == shelf)
-        .toList();
+    final List<BookModel> shelfBooks =
+    all.where((b) => b.shelf == shelf).toList();
 
-    // 3️⃣ FINAL BOOK LIST (NO FALLBACK NEEDED)
-    final List<BookModel> safeBooks = shelfBooks;
-
-    // 4️⃣ TITLE
     final String safeTitle = "Shelf $shelf";
+
+    // 🔥 group by rack
+    final Map<String, List<BookModel>> groupedByRack = {};
+    for (var book in shelfBooks) {
+      groupedByRack.putIfAbsent(book.rackId, () => []);
+      groupedByRack[book.rackId]!.add(book);
+    }
 
     return Scaffold(
       body: kIsWeb
-          ? _buildWebView(context, safeBooks, safeTitle)
-          : _buildMobileView(context, safeBooks, safeTitle),
+          ? _buildWebView(context, groupedByRack, safeTitle)
+          : _buildMobileView(context, groupedByRack, safeTitle),
     );
   }
 
   // ================= WEB VIEW =================
   Widget _buildWebView(
-    BuildContext context,
-    List<BookModel> safeBooks,
-    String safeTitle,
-  ) {
+      BuildContext context,
+      Map<String, List<BookModel>> groupedByRack,
+      String safeTitle,
+      ) {
     final width = MediaQuery.of(context).size.width;
 
     return Scaffold(
@@ -52,35 +52,35 @@ class AllBooksPage extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
               child: Column(
                 children: [
-                  _webHeader(width, safeTitle, safeBooks.length),
+                  _webHeader(
+                    width,
+                    safeTitle,
+                    groupedByRack.values.expand((e) => e).length,
+                  ),
                   const SizedBox(height: 24),
 
                   Expanded(
-                    child: safeBooks.isEmpty
+                    child: groupedByRack.isEmpty
                         ? const Center(
-                            child: Text(
-                              "No books found",
-                              style: TextStyle(fontSize: 18),
-                            ),
-                          )
-                        : GridView.builder(
-                            itemCount: safeBooks.length,
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: _webGridCount(width),
-                                  crossAxisSpacing: 20,
-                                  mainAxisSpacing: 20,
-                                  childAspectRatio: _webAspectRatio(width),
-                                ),
-                            itemBuilder: (context, index) {
-                              final book = safeBooks[index];
-
-                              return BookCard(
-                                book: book,
-                                onTap: () => _openBook(context, book),
-                              );
-                            },
+                      child: Text(
+                        "No books found",
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    )
+                        : ListView(
+                      children: groupedByRack.entries.map((entry) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 28),
+                          child: _buildRackSection(
+                            context: context,
+                            rackName: entry.key,
+                            books: entry.value,
+                            isWeb: true,
+                            width: width,
                           ),
+                        );
+                      }).toList(),
+                    ),
                   ),
                 ],
               ),
@@ -93,13 +93,12 @@ class AllBooksPage extends StatelessWidget {
 
   // ================= MOBILE VIEW =================
   Widget _buildMobileView(
-    BuildContext context,
-    List<BookModel> safeBooks,
-    String safeTitle,
-  ) {
+      BuildContext context,
+      Map<String, List<BookModel>> groupedByRack,
+      String safeTitle,
+      ) {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F8FC),
-
       appBar: AppBar(
         title: Text(safeTitle),
         centerTitle: true,
@@ -108,40 +107,100 @@ class AllBooksPage extends StatelessWidget {
         automaticallyImplyLeading: false,
         elevation: 0,
       ),
-
-      body: safeBooks.isEmpty
+      body: groupedByRack.isEmpty
           ? const Center(
-              child: Text("No books found", style: TextStyle(fontSize: 18)),
-            )
+        child: Text("No books found", style: TextStyle(fontSize: 18)),
+      )
           : Padding(
-              padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-              child: MediaQuery.removePadding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: ListView(
+          padding: const EdgeInsets.only(bottom: 40),
+          children: groupedByRack.entries.map((entry) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 24),
+              child: _buildRackSection(
                 context: context,
-                removeTop: true,
-                removeBottom: false,
-                removeLeft: false,
-                removeRight: false,
-                child: GridView.builder(
-                  padding: const EdgeInsets.only(bottom: 50), // 🔥 important
-                  physics: const BouncingScrollPhysics(),
-                  itemCount: safeBooks.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 0.68,
-                  ),
-                  itemBuilder: (context, index) {
-                    final book = safeBooks[index];
+                rackName: entry.key,
+                books: entry.value,
+                isWeb: false,
+                width: MediaQuery.of(context).size.width,
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
 
-                    return BookCard(
-                      book: book,
-                      onTap: () => _openBook(context, book),
-                    );
-                  },
+  // ================= RACK SECTION =================
+  Widget _buildRackSection({
+    required BuildContext context,
+    required String rackName,
+    required List<BookModel> books,
+    required bool isWeb,
+    required double width,
+  }) {
+    final double cardWidth = isWeb
+        ? (width > 1400
+        ? 260
+        : width > 1000
+        ? 230
+        : 200)
+        : width * 0.6;
+
+    final double sectionHeight = isWeb ? 320 : 250;
+
+    final previewBooks = books.take(8).toList(); // preview only
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                "Rack $rackName",
+                style: TextStyle(
+                  fontSize: isWeb ? 24 : 20,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF0F172A),
                 ),
               ),
             ),
+            TextButton(
+              onPressed: () {
+                _showRackBooksPage(
+                  context,
+                  rackName,
+                  books,
+                  isWeb,
+                );
+              },
+              child: const Text("View All"),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        SizedBox(
+          height: sectionHeight,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: previewBooks.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 14),
+            itemBuilder: (context, index) {
+              final book = previewBooks[index];
+
+              return SizedBox(
+                width: cardWidth,
+                child: BookCard(
+                  book: book,
+                  onTap: () => _openBook(context, book),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -193,27 +252,19 @@ class AllBooksPage extends StatelessWidget {
     );
   }
 
-  // ================= HELPERS =================
-  int _webGridCount(double width) {
-    if (width >= 1800) return 6;
-    if (width >= 1450) return 5;
-    if (width >= 1100) return 4;
-    if (width >= 850) return 3;
-    return 2;
-  }
-
-  double _webAspectRatio(double width) {
-    if (width >= 1450) return 0.74;
-    if (width >= 1100) return 0.72;
-    if (width >= 850) return 0.70;
-    return 0.68;
-  }
-
   void _openBook(BuildContext context, BookModel book) {
-    // 1️⃣ Always sync global state
     AppData.selectedBook = book;
-
-    // 2️⃣ Navigate using ID only (clean architecture)
     context.push('/book-detail/${book.bookId}');
   }
+
+  void _showRackBooksPage(
+      BuildContext context,
+      String rackName,
+      List<BookModel> books,
+      bool isWeb,
+      ) {
+    AppData.setBooks(books, "Rack $rackName");
+    context.push('/rack-books/$rackName');
+  }
+
 }
