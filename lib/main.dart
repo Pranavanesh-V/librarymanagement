@@ -63,7 +63,7 @@ class LibraryApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: 'University Library',
+      title: 'SOT Library Portal',
       theme: ThemeData(useMaterial3: true),
       routerConfig: _router,
     );
